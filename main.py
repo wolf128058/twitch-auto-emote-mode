@@ -1,3 +1,4 @@
+import sys
 import requests
 import json
 import os
@@ -122,6 +123,14 @@ def is_stream_live(broadcaster_id):
             return False
 
     except requests.exceptions.RequestException as e:
+        # Prüft, ob der Fehler durch ein Netzwerkproblem (DNS, Verbindung) verursacht wird.
+        if "NameResolutionError" in str(e) or "Max retries exceeded" in str(e):
+            print(f"{RED}❌ KRITISCHER FEHLER: Netzwerk- oder DNS-Problem beim Abrufen des Stream-Status!{NC}")
+            print(f"   Die Bedingung 'Offline' kann NICHT sicher festgestellt werden. Das Skript bricht ab.")
+            # Beendet das gesamte Python-Skript mit dem Exit-Code 1 (Fehler)
+            sys.exit(1)
+
+        # Für alle anderen Request-Fehler (die nicht kritisch sind)
         print(f"Fehler beim Abrufen des Stream-Status: {e}")
         return False
 
